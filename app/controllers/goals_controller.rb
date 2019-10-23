@@ -2,9 +2,15 @@ class GoalsController < ApplicationController
   def create
     case params[:team]
     when 'red'
-        ActionCable.server.broadcast 'goal_notifications_channel', message: 'red'
+      broadcast_goal('red')
     when 'white'
-      ActionCable.server.broadcast 'goal_notifications_channel', message: 'white'
+      broadcast_goal('white')
     end
+  end
+
+  private
+
+  def broadcast_goal(team)
+    ActionCable.server.broadcast 'goal_notifications_channel', team: team
   end
 end
