@@ -1,4 +1,4 @@
-FROM ruby:2.6.3-alpine
+FROM arm32v7/ruby:2.6.3-alpine
 
 COPY . /app
 WORKDIR /app
