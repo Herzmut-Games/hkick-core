@@ -7,7 +7,7 @@ ENV RAILS_ENV production
 
 RUN apk update && \
     apk upgrade && \
-    apk add build-base sqlite-dev && \
+    apk add build-base sqlite-dev tzdata && \
     rm -rf /var/cache/apk/*
 
 RUN bundle install --deployment --without development test
