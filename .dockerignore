@@ -1,5 +1,0 @@
-Dockerfile
-/vendor/
-/config/master.key
-/tmp/
-/redis
