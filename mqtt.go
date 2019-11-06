@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"log"
-	"net/http"
 	"net/url"
 	"time"
 
@@ -29,11 +28,12 @@ func connect(clientID string, uri *url.URL) mqtt.Client {
 	return client
 }
 
-func goalCount(w http.ResponseWriter, r *http.Request) {
-	r.ParseForm()
+func listen(uri *url.URL, topic string) {
+	client = connect("sub", uri)
+	client.Subscribe(topic, 0, func(client mqtt.Client, msg mqtt.Message) {
+		fmt.Printf("* [%s] %s\n", msg.Topic(), string(msg.Payload()))
 
-	scoredTeam := r.FormValue("team")
-
-	fmt.Printf("Team %s scored", scoredTeam)
-	client.Publish(goalTopic, 0, false, scoredTeam)
+		// this should be configureable as callback
+		handleGoal(string(msg.Payload()))
+	})
 }
