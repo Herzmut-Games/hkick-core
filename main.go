@@ -48,12 +48,11 @@ func leadingTeam() string {
 
 func decreaseScore(team string) {
 	if team == "red" {
-		scoreRed--
+		scoreRed = int(math.Max(0, float64(scoreRed-1)))
 	} else if team == "white" {
-		scoreWhite--
+		scoreWhite = int(math.Max(0, float64(scoreWhite-1)))
 	}
 	updateScore()
-
 }
 
 func increaseScore(team string) {
@@ -63,7 +62,12 @@ func increaseScore(team string) {
 		scoreWhite++
 	}
 	updateScore()
+}
 
+func resetScore() {
+	scoreWhite = 0
+	scoreRed = 0
+	updateScore()
 }
 
 func updateScore() {
@@ -91,7 +95,5 @@ func gameEnd() {
 
 	publish("game/end", winner)
 
-	scoreWhite = 0
-	scoreRed = 0
-	updateScore()
+	resetScore()
 }

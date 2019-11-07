@@ -39,6 +39,9 @@ func subscribe(uri *url.URL) {
 	client.Subscribe("score/increase", 0, func(client mqtt.Client, msg mqtt.Message) {
 		increaseScore(string(msg.Payload()))
 	})
+	client.Subscribe("score/reset", 0, func(client mqtt.Client, msg mqtt.Message) {
+		resetScore()
+	})
 }
 
 func publish(topic string, message string) {
