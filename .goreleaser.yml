@@ -18,7 +18,6 @@ nfpms:
     description: hkick-core
     formats:
       - deb
-      - rpm
 
     files:
       "scripts/etc/systemd/system/hkick-core.service": "/etc/systemd/system/hkick-core.service"
@@ -26,6 +25,3 @@ nfpms:
     scripts:
       postinstall: "scripts/postinstall.sh"
       postremove: "scripts/postremove.sh"
-
-signs:
-  - artifacts: all
