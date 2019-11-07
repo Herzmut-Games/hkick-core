@@ -18,22 +18,29 @@ func connect(clientID string, uri *url.URL) mqtt.Client {
 	opts := mqtt.NewClientOptions()
 	opts.AddBroker(fmt.Sprintf("tcp://%s", uri.Host))
 
-	client := mqtt.NewClient(opts)
+	client = mqtt.NewClient(opts)
 	token := client.Connect()
 	for !token.WaitTimeout(3 * time.Second) {
 	}
 	if err := token.Error(); err != nil {
 		log.Fatal(err)
 	}
+
 	return client
 }
 
-func listen(uri *url.URL, topic string) {
-	client = connect("sub", uri)
-	client.Subscribe(topic, 0, func(client mqtt.Client, msg mqtt.Message) {
-		fmt.Printf("* [%s] %s\n", msg.Topic(), string(msg.Payload()))
-
-		// this should be configureable as callback
-		handleGoal(string(msg.Payload()))
+func subscribe(uri *url.URL) {
+	client.Subscribe("goals", 0, func(client mqtt.Client, msg mqtt.Message) {
+		increaseScore(string(msg.Payload()))
 	})
+	client.Subscribe("score/decrease", 0, func(client mqtt.Client, msg mqtt.Message) {
+		decreaseScore(string(msg.Payload()))
+	})
+	client.Subscribe("score/increase", 0, func(client mqtt.Client, msg mqtt.Message) {
+		increaseScore(string(msg.Payload()))
+	})
+}
+
+func publish(topic string, message string) {
+	client.Publish(topic, 0, false, message)
 }

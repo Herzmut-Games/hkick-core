@@ -7,6 +7,7 @@ import (
 	"net/url"
 	"os"
 	"os/signal"
+	"strconv"
 )
 
 var (
@@ -25,7 +26,8 @@ func mqttURI() *url.URL {
 
 func main() {
 
-	go listen(mqttURI(), "goals")
+	connect("hkick-core", mqttURI())
+	go subscribe(mqttURI())
 
 	// capture exit signals to ensure resources are released on exit.
 	quit := make(chan os.Signal, 1)
@@ -36,19 +38,41 @@ func main() {
 	}
 }
 
-func handleGoal(team string) {
-	fmt.Println("goal")
-
-	if team == "white" {
-		scoreWhite++
-	} else if team == "red" {
-		scoreRed++
+func leadingTeam() string {
+	if scoreRed > scoreWhite {
+		return "red"
 	}
 
+	return "white"
+}
+
+func decreaseScore(team string) {
+	if team == "red" {
+		scoreRed--
+	} else if team == "white" {
+		scoreWhite--
+	}
+	updateScore()
+
+}
+
+func increaseScore(team string) {
+	if team == "red" {
+		scoreRed++
+	} else if team == "white" {
+		scoreWhite++
+	}
+	updateScore()
+
+}
+
+func updateScore() {
 	distance := int(math.Abs(float64(scoreRed - scoreWhite)))
 
-	fmt.Printf("distance is %d\n", distance)
-	fmt.Printf("scoreRed is %d and scoreWhite is %d\n", scoreRed, scoreWhite)
+	fmt.Printf("red is %d and white is %d (distance %d)\n", scoreRed, scoreWhite, distance)
+
+	publish("score/red", strconv.Itoa(scoreRed))
+	publish("score/white", strconv.Itoa(scoreWhite))
 
 	if distance >= 2 {
 		if (scoreRed >= 5) || (scoreWhite >= 5) {
@@ -57,27 +81,17 @@ func handleGoal(team string) {
 	} else if (scoreRed >= 8) || (scoreWhite >= 8) {
 		gameEnd()
 	}
-
-}
-
-func leadingTeam() string {
-	if scoreRed > scoreWhite {
-		return "red"
-	}
-
-	return "white"
-
 }
 
 func gameEnd() {
 	fmt.Println("game is over")
 
-	client := connect("pub", mqttURI())
-
 	winner := leadingTeam()
 	fmt.Printf("%s is the winner \n", winner)
-	client.Publish("game", 0, false, winner)
+
+	publish("game/end", winner)
 
 	scoreWhite = 0
 	scoreRed = 0
+	updateScore()
 }
