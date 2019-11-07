@@ -15,8 +15,6 @@ builds:
 
 nfpms:
   - id: foo
-    name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
-
     vendor: Herzmut Games Ltd.
     homepage: https://herzmut.games
 
