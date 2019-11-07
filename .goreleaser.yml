@@ -12,3 +12,16 @@ builds:
       - 5
       - 6
       - 7
+
+nfpms:
+  - id: foo
+    name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+
+    vendor: Herzmut Games Ltd.
+    homepage: https://herzmut.games
+
+    maintainer: Flipez <code@brauser.io>
+    description: hkick-core
+    formats:
+      - deb
+      - rpm
