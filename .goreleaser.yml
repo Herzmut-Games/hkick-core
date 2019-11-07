@@ -25,7 +25,7 @@ nfpms:
       - rpm
 
     files:
-      "scripts/etc/systemd/system/": "/etc/systemd/system"
+      "scripts/etc/systemd/system/hkick-core.service": "/etc/systemd/system/hkick-core.service"
 
     scripts:
       postinstall: "scripts/postinstall.sh"
