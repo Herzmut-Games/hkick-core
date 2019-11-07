@@ -6,7 +6,7 @@ PrivateTmp=true
 User=pi
 Group=pi
 Type=simple
-ExecStart=/usr/local/bin/hkick-goalref
+ExecStart=/usr/local/bin/hkick-core
 Restart=always
 
 [Install]
