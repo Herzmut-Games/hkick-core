@@ -23,3 +23,10 @@ nfpms:
     formats:
       - deb
       - rpm
+
+    files:
+      "scripts/etc/systemd/system/": "/etc/systemd/system"
+
+    scripts:
+      postinstall: "scripts/postinstall.sh"
+      postremove: "scripts/postremove.sh"
