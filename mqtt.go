@@ -44,6 +44,6 @@ func subscribe(uri *url.URL) {
 	})
 }
 
-func publish(topic string, message string) {
-	client.Publish(topic, 0, false, message)
+func publish(topic string, message string, retain bool) {
+	client.Publish(topic, 0, retain, message)
 }
