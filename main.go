@@ -52,6 +52,7 @@ func decreaseScore(team string) {
 	} else if team == "white" {
 		scoreWhite = int(math.Max(0, float64(scoreWhite-1)))
 	}
+	publish("sound/play", "denied")
 	updateScore()
 }
 
@@ -61,12 +62,20 @@ func increaseScore(team string) {
 	} else if team == "white" {
 		scoreWhite++
 	}
+
+	if (scoreRed + scoreWhite) == 1 {
+		publish("sound/play", "firstgoal")
+	} else {
+		publish("sound/play", "goal")
+	}
+
 	updateScore()
 }
 
 func resetScore() {
 	scoreWhite = 0
 	scoreRed = 0
+	publish("sound/play", "start")
 	updateScore()
 }
 
