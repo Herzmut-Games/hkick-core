@@ -84,8 +84,8 @@ func updateScore() {
 
 	fmt.Printf("red is %d and white is %d (distance %d)\n", scoreRed, scoreWhite, distance)
 
-	publish("score/red", strconv.Itoa(scoreRed))
-	publish("score/white", strconv.Itoa(scoreWhite))
+	publish("score/red", strconv.Itoa(scoreRed), true)
+	publish("score/white", strconv.Itoa(scoreWhite), true)
 
 	if distance >= 2 {
 		if (scoreRed >= 5) || (scoreWhite >= 5) {
@@ -102,7 +102,7 @@ func gameEnd() {
 	winner := leadingTeam()
 	fmt.Printf("%s is the winner \n", winner)
 
-	publish("game/end", winner)
+	publish("game/end", winner, false)
 
 	resetScore()
 }
