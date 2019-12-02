@@ -11,8 +11,12 @@ import (
 )
 
 var (
-	scoreRed   = 0
-	scoreWhite = 0
+	scoreRed            = 0
+	scoreWhite          = 0
+	currentRound        = 0
+	goalHistory         = []string{}
+	availableSoundModes = []string{"default", "meme", "quake", "techno"}
+	currentSoundMode    = "random"
 )
 
 func mqttURI() *url.URL {
@@ -24,8 +28,17 @@ func mqttURI() *url.URL {
 	return uri
 }
 
-func main() {
+func playSound(event string) {
+	if currentSoundMode == "random" {
+		publish("sound/play", event, false)
 
+	} else {
+		publish("sound/play", event+"/"+currentSoundMode, false)
+
+	}
+}
+
+func main() {
 	connect("hkick-core", mqttURI())
 	go subscribe(mqttURI())
 
@@ -57,25 +70,19 @@ func decreaseScore(team string) {
 }
 
 func increaseScore(team string) {
-	if team == "red" {
-		scoreRed++
-	} else if team == "white" {
-		scoreWhite++
-	}
+	goalHistory = append(goalHistory, team)
+	playSound("goal")
 
-	if (scoreRed + scoreWhite) == 1 {
-		publish("sound/play", "firstgoal", false)
-	} else {
-		publish("sound/play", "goal", false)
-	}
+	updateScore()
+}
 
+func undoScore() {
 	updateScore()
 }
 
 func resetScore() {
 	scoreWhite = 0
 	scoreRed = 0
-	publish("sound/play", "start", false)
 	updateScore()
 }
 
@@ -89,9 +96,29 @@ func updateScore() {
 
 	if distance >= 2 {
 		if (scoreRed >= 5) || (scoreWhite >= 5) {
-			gameEnd()
+			roundEnd()
 		}
 	} else if (scoreRed >= 8) || (scoreWhite >= 8) {
+		roundEnd()
+	}
+}
+
+func startGame() {
+	currentRound = 1
+	publish("game/round", strconv.Itoa(currentRound), true)
+	publish("sound/play", "start", false)
+
+}
+
+func nextRound() {
+	currentRound++
+	resetScore()
+}
+
+func roundEnd() {
+	if currentRound < 3 {
+		nextRound()
+	} else {
 		gameEnd()
 	}
 }
