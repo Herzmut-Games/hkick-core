@@ -13,7 +13,7 @@ import (
 var (
 	scoreRed            = 0
 	scoreWhite          = 0
-	currentRound        = 0
+	winHistory          = []string{}
 	goalHistory         = []string{}
 	availableSoundModes = []string{"default", "meme", "quake", "techno"}
 	currentSoundMode    = "random"
@@ -31,10 +31,8 @@ func mqttURI() *url.URL {
 func playSound(event string) {
 	if currentSoundMode == "random" {
 		publish("sound/play", event, false)
-
 	} else {
 		publish("sound/play", event+"/"+currentSoundMode, false)
-
 	}
 }
 
@@ -108,32 +106,54 @@ func updateScore() {
 }
 
 func startGame() {
-	currentRound = 1
-	publish("game/round", strconv.Itoa(currentRound), true)
+	publish("game/round", strconv.Itoa(currentRound()), true)
 	publish("sound/play", "start", false)
 
 }
 
+func currentRound() int {
+	return len(winHistory)
+}
+
 func nextRound() {
-	currentRound++
 	resetScore()
 }
 
 func roundEnd() {
-	if currentRound < 3 {
-		nextRound()
+	if scoreRed >= scoreWhite {
+		winHistory = append(winHistory, "red")
+
 	} else {
-		gameEnd()
+		winHistory = append(winHistory, "white")
+	}
+
+	var redWins = 0
+	var whiteWins = 0
+	for _, team := range winHistory {
+		switch team {
+		case "red":
+			redWins++
+		case "white":
+			whiteWins++
+		}
+	}
+
+	if redWins == 2 {
+		gameEnd("red")
+	} else if whiteWins == 2 {
+		gameEnd("white")
+	} else {
+		nextRound()
 	}
 }
 
-func gameEnd() {
+func gameEnd(winner string) {
 	fmt.Println("game is over")
 
-	winner := leadingTeam()
 	fmt.Printf("%s is the winner \n", winner)
 
 	publish("game/end", winner, false)
 
 	resetScore()
+	winHistory = []string{}
 }
