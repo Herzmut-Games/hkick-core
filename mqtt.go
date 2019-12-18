@@ -33,14 +33,17 @@ func subscribe(uri *url.URL) {
 	client.Subscribe("goals", 0, func(client mqtt.Client, msg mqtt.Message) {
 		increaseScore(string(msg.Payload()))
 	})
-	client.Subscribe("score/decrease", 0, func(client mqtt.Client, msg mqtt.Message) {
-		decreaseScore(string(msg.Payload()))
-	})
 	client.Subscribe("score/increase", 0, func(client mqtt.Client, msg mqtt.Message) {
 		increaseScore(string(msg.Payload()))
 	})
+	client.Subscribe("score/undo", 0, func(client mqtt.Client, msg mqtt.Message) {
+		undoScore()
+	})
 	client.Subscribe("score/reset", 0, func(client mqtt.Client, msg mqtt.Message) {
 		resetScore()
+	})
+	client.Subscribe("game/start", 0, func(client mqtt.Client, msg mqtt.Message) {
+		startGame()
 	})
 }
 

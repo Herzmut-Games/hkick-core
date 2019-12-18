@@ -11,8 +11,12 @@ import (
 )
 
 var (
-	scoreRed   = 0
-	scoreWhite = 0
+	scoreRed            = 0
+	scoreWhite          = 0
+	winHistory          = []string{}
+	goalHistory         = []string{}
+	availableSoundModes = []string{"default", "meme", "quake", "techno"}
+	currentSoundMode    = "random"
 )
 
 func mqttURI() *url.URL {
@@ -24,8 +28,15 @@ func mqttURI() *url.URL {
 	return uri
 }
 
-func main() {
+func playSound(event string) {
+	if currentSoundMode == "random" {
+		publish("sound/play", event, false)
+	} else {
+		publish("sound/play", event+"/"+currentSoundMode, false)
+	}
+}
 
+func main() {
 	connect("hkick-core", mqttURI())
 	go subscribe(mqttURI())
 
@@ -46,40 +57,38 @@ func leadingTeam() string {
 	return "white"
 }
 
-func decreaseScore(team string) {
-	if team == "red" {
-		scoreRed = int(math.Max(0, float64(scoreRed-1)))
-	} else if team == "white" {
-		scoreWhite = int(math.Max(0, float64(scoreWhite-1)))
-	}
-	publish("sound/play", "denied", false)
+func increaseScore(team string) {
+	goalHistory = append(goalHistory, team)
+	playSound("goal")
+
 	updateScore()
 }
 
-func increaseScore(team string) {
-	if team == "red" {
-		scoreRed++
-	} else if team == "white" {
-		scoreWhite++
-	}
-
-	if (scoreRed + scoreWhite) == 1 {
-		publish("sound/play", "firstgoal", false)
-	} else {
-		publish("sound/play", "goal", false)
+func undoScore() {
+	if len(goalHistory) > 0 {
+		goalHistory = goalHistory[:len(goalHistory)-1]
 	}
 
 	updateScore()
 }
 
 func resetScore() {
-	scoreWhite = 0
-	scoreRed = 0
-	publish("sound/play", "start", false)
+	goalHistory = []string{}
 	updateScore()
 }
 
 func updateScore() {
+	scoreRed = 0
+	scoreWhite = 0
+	for _, team := range goalHistory {
+		switch team {
+		case "red":
+			scoreRed++
+		case "white":
+			scoreWhite++
+		}
+	}
+
 	distance := int(math.Abs(float64(scoreRed - scoreWhite)))
 
 	fmt.Printf("red is %d and white is %d (distance %d)\n", scoreRed, scoreWhite, distance)
@@ -89,20 +98,62 @@ func updateScore() {
 
 	if distance >= 2 {
 		if (scoreRed >= 5) || (scoreWhite >= 5) {
-			gameEnd()
+			roundEnd()
 		}
 	} else if (scoreRed >= 8) || (scoreWhite >= 8) {
-		gameEnd()
+		roundEnd()
 	}
 }
 
-func gameEnd() {
+func startGame() {
+	publish("game/round", strconv.Itoa(currentRound()), true)
+	publish("sound/play", "start", false)
+
+}
+
+func currentRound() int {
+	return len(winHistory)
+}
+
+func nextRound() {
+	resetScore()
+}
+
+func roundEnd() {
+	if scoreRed >= scoreWhite {
+		winHistory = append(winHistory, "red")
+
+	} else {
+		winHistory = append(winHistory, "white")
+	}
+
+	var redWins = 0
+	var whiteWins = 0
+	for _, team := range winHistory {
+		switch team {
+		case "red":
+			redWins++
+		case "white":
+			whiteWins++
+		}
+	}
+
+	if redWins == 1 {
+		gameEnd("red")
+	} else if whiteWins == 1 {
+		gameEnd("white")
+	} else {
+		nextRound()
+	}
+}
+
+func gameEnd(winner string) {
 	fmt.Println("game is over")
 
-	winner := leadingTeam()
 	fmt.Printf("%s is the winner \n", winner)
 
 	publish("game/end", winner, false)
 
 	resetScore()
+	winHistory = []string{}
 }
