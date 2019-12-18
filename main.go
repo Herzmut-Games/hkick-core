@@ -59,16 +59,6 @@ func leadingTeam() string {
 	return "white"
 }
 
-func decreaseScore(team string) {
-	if team == "red" {
-		scoreRed = int(math.Max(0, float64(scoreRed-1)))
-	} else if team == "white" {
-		scoreWhite = int(math.Max(0, float64(scoreWhite-1)))
-	}
-	publish("sound/play", "denied", false)
-	updateScore()
-}
-
 func increaseScore(team string) {
 	goalHistory = append(goalHistory, team)
 	playSound("goal")
@@ -85,12 +75,22 @@ func undoScore() {
 }
 
 func resetScore() {
-	scoreWhite = 0
-	scoreRed = 0
+	goalHistory = []string{}
 	updateScore()
 }
 
 func updateScore() {
+	scoreRed = 0
+	scoreWhite = 0
+	for _, team := range goalHistory {
+		switch team {
+		case "red":
+			scoreRed++
+		case "white":
+			scoreWhite++
+		}
+	}
+
 	distance := int(math.Abs(float64(scoreRed - scoreWhite)))
 
 	fmt.Printf("red is %d and white is %d (distance %d)\n", scoreRed, scoreWhite, distance)
