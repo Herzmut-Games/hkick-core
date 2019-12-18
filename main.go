@@ -77,6 +77,10 @@ func increaseScore(team string) {
 }
 
 func undoScore() {
+	if len(goalHistory) > 0 {
+		goalHistory = goalHistory[:len(goalHistory)-1]
+	}
+
 	updateScore()
 }
 

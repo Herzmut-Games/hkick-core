@@ -40,7 +40,7 @@ func subscribe(uri *url.URL) {
 		increaseScore(string(msg.Payload()))
 	})
 	client.Subscribe("score/undo", 0, func(client mqtt.Client, msg mqtt.Message) {
-		undoScore(string(msg.Payload()))
+		undoScore()
 	})
 	client.Subscribe("score/reset", 0, func(client mqtt.Client, msg mqtt.Message) {
 		resetScore()
