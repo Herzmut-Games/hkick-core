@@ -138,9 +138,9 @@ func roundEnd() {
 		}
 	}
 
-	if redWins == 2 {
+	if redWins == 1 {
 		gameEnd("red")
-	} else if whiteWins == 2 {
+	} else if whiteWins == 1 {
 		gameEnd("white")
 	} else {
 		nextRound()
