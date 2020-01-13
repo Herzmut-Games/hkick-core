@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"math"
@@ -8,13 +9,28 @@ import (
 	"os"
 	"os/signal"
 	"strconv"
+	"time"
 )
 
 var (
-	scoreRed            = 0
-	scoreWhite          = 0
-	winHistory          = []string{}
-	goalHistory         = []string{}
+	scoreRed   = 0
+	scoreWhite = 0
+
+	gameStartTime  = time.Now()
+	roundStartTime = time.Now()
+
+	gameIsRunning = false
+
+	// The teams will be fixed in the first round as follows:
+	// team A will start as red
+	// team B will start as white
+	// after one round teams will be swapped. hkick-core needs to take care of that when counting win.
+	teamAWinCount = 0
+	teamBWinCount = 0
+
+	winHistory  = []Round{}
+	goalHistory = []Goal{}
+
 	availableSoundModes = []string{"default", "meme", "quake", "techno"}
 	currentSoundMode    = "random"
 )
@@ -58,13 +74,15 @@ func leadingTeam() string {
 }
 
 func increaseScore(team string) {
-	goalHistory = append(goalHistory, team)
+	if (!gameIsRunning) { return }
+	goalHistory = append(goalHistory, Goal{Team: team, Time: time.Since(roundStartTime).Seconds()})
 	playSound("goal")
 
 	updateScore()
 }
 
 func undoScore() {
+	if (!gameIsRunning) { return }
 	if len(goalHistory) > 0 {
 		goalHistory = goalHistory[:len(goalHistory)-1]
 	}
@@ -73,15 +91,19 @@ func undoScore() {
 }
 
 func resetScore() {
-	goalHistory = []string{}
+	if (!gameIsRunning) { return }
+	goalHistory = []Goal{}
+	roundStartTime = time.Now()
 	updateScore()
 }
 
 func updateScore() {
+  debug()
+
 	scoreRed = 0
 	scoreWhite = 0
-	for _, team := range goalHistory {
-		switch team {
+	for _, goal := range goalHistory {
+		switch goal.Team {
 		case "red":
 			scoreRed++
 		case "white":
@@ -96,6 +118,9 @@ func updateScore() {
 	publish("score/red", strconv.Itoa(scoreRed), true)
 	publish("score/white", strconv.Itoa(scoreWhite), true)
 
+	goals, _ := json.Marshal(goalHistory)
+	publish("round/goals", string(goals), true)
+
 	if distance >= 2 {
 		if (scoreRed >= 5) || (scoreWhite >= 5) {
 			roundEnd()
@@ -106,42 +131,61 @@ func updateScore() {
 }
 
 func startGame() {
+	clearAll()
+	gameIsRunning = true
 	publish("game/round", strconv.Itoa(currentRound()), true)
 	publish("sound/play", "start", false)
 
 }
 
 func currentRound() int {
-	return len(winHistory)
+	return len(winHistory) + 1
+}
+
+func teamsAreSwapped() bool {
+	return currentRound() == 2
 }
 
 func nextRound() {
+	publish("round/end", "end", false)
+	publish("round/current", strconv.Itoa(currentRound()), true)
+	
+	rounds, _ := json.Marshal(winHistory)
+	fmt.Printf(string(rounds))
 	resetScore()
 }
 
 func roundEnd() {
 	if scoreRed >= scoreWhite {
-		winHistory = append(winHistory, "red")
-
+		if teamsAreSwapped() {
+			winHistory = append(winHistory, Round{Winner: "b", Time: time.Since(roundStartTime).Seconds()})
+		} else {
+			winHistory = append(winHistory, Round{Winner: "a", Time: time.Since(roundStartTime).Seconds()})
+		}
 	} else {
-		winHistory = append(winHistory, "white")
-	}
-
-	var redWins = 0
-	var whiteWins = 0
-	for _, team := range winHistory {
-		switch team {
-		case "red":
-			redWins++
-		case "white":
-			whiteWins++
+		if teamsAreSwapped() {
+			winHistory = append(winHistory, Round{Winner: "a", Time: time.Since(roundStartTime).Seconds()})
+		} else {
+			winHistory = append(winHistory, Round{Winner: "b", Time: time.Since(roundStartTime).Seconds()})
 		}
 	}
 
-	if redWins == 1 {
-		gameEnd("red")
-	} else if whiteWins == 1 {
-		gameEnd("white")
+	teamAWinCount = 0
+	teamBWinCount = 0
+	for _, round := range winHistory {
+		switch round.Winner {
+		case "a":
+				teamAWinCount++
+
+		case "b":
+				teamBWinCount++
+		}
+	}
+
+	if teamAWinCount == 2 {
+		gameEnd("a")
+	} else if teamBWinCount == 2 {
+		gameEnd("b")
 	} else {
 		nextRound()
 	}
@@ -149,11 +193,36 @@ func roundEnd() {
 
 func gameEnd(winner string) {
 	fmt.Println("game is over")
+	rounds, _ := json.Marshal(winHistory)
+	fmt.Printf(string(rounds))
 
 	fmt.Printf("%s is the winner \n", winner)
 
 	publish("game/end", winner, false)
 
 	resetScore()
-	winHistory = []string{}
+	clearAll()
+}
+
+func clearAll() {
+	gameStartTime = time.Now()
+	roundStartTime = time.Now()
+	teamAWinCount = 0
+	teamBWinCount = 0
+	scoreRed = 0
+	scoreWhite = 0
+	winHistory = []Round{}
+	goalHistory = []Goal{}
+	gameIsRunning = false
+
+	publish("round/current", strconv.Itoa(currentRound()), true)
+	
+	debug()
+}
+
+
+
+func debug() {
+	publish("debug/teamAWinCount", strconv.Itoa(teamAWinCount), false)
+	publish("debug/teamBWinCount", strconv.Itoa(teamBWinCount), false)
 }
