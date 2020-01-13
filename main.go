@@ -209,6 +209,7 @@ func gameEnd(winner string) {
 
 	game, _ := json.Marshal(Game{Winner: winner, Time: time.Since(gameStartTime).Seconds()})
 	publish("game/end", string(game), false)
+	publish("sound/play", "end", false)
 
 	resetScore()
 	clearAll()
