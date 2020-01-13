@@ -30,6 +30,7 @@ var (
 
 	winHistory  = []Round{}
 	goalHistory = []Goal{}
+	lastGoalHistory = []Goal{}
 
 	availableSoundModes = []string{"default", "meme", "quake", "techno"}
 	currentSoundMode    = "random"
@@ -83,6 +84,12 @@ func increaseScore(team string) {
 
 func undoScore() {
 	if (!gameIsRunning) { return }
+
+	if (len(goalHistory) == 0 && len(winHistory) >= 1) {
+		goalHistory = lastGoalHistory
+		winHistory = winHistory[:len(winHistory)-1]
+	}
+
 	if len(goalHistory) > 0 {
 		goalHistory = goalHistory[:len(goalHistory)-1]
 	}
@@ -117,6 +124,7 @@ func updateScore() {
 
 	publish("score/red", strconv.Itoa(scoreRed), true)
 	publish("score/white", strconv.Itoa(scoreWhite), true)
+	publish("round/current", strconv.Itoa(currentRound()), true)
 
 	goals, _ := json.Marshal(goalHistory)
 	publish("round/goals", string(goals), true)
@@ -133,8 +141,8 @@ func updateScore() {
 func startGame() {
 	clearAll()
 	gameIsRunning = true
-	publish("game/round", strconv.Itoa(currentRound()), true)
 	publish("sound/play", "start", false)
+	updateScore()
 
 }
 
@@ -152,6 +160,7 @@ func nextRound() {
 	
 	rounds, _ := json.Marshal(winHistory)
 	fmt.Printf(string(rounds))
+	lastGoalHistory = goalHistory
 	resetScore()
 }
 
@@ -198,7 +207,8 @@ func gameEnd(winner string) {
 
 	fmt.Printf("%s is the winner \n", winner)
 
-	publish("game/end", winner, false)
+	game, _ := json.Marshal(Game{Winner: winner, Time: time.Since(gameStartTime).Seconds()})
+	publish("game/end", string(game), false)
 
 	resetScore()
 	clearAll()
