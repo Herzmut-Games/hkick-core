@@ -28,8 +28,8 @@ var (
 	teamAWinCount = 0
 	teamBWinCount = 0
 
-	winHistory  = []Round{}
-	goalHistory = []Goal{}
+	winHistory      = []Round{}
+	goalHistory     = []Goal{}
 	lastGoalHistory = []Goal{}
 
 	availableSoundModes = []string{"default", "meme", "quake", "techno"}
@@ -75,17 +75,27 @@ func leadingTeam() string {
 }
 
 func increaseScore(team string) {
-	if (!gameIsRunning) { return }
+	if !gameIsRunning {
+		return
+	}
 	goalHistory = append(goalHistory, Goal{Team: team, Time: time.Since(roundStartTime).Seconds()})
-	playSound("goal")
+	if len(goalHistory) == 1 {
+		playSound("firstgoal")
+	} else {
+		playSound("goal")
+	}
 
 	updateScore()
 }
 
 func undoScore() {
-	if (!gameIsRunning) { return }
+	if !gameIsRunning {
+		return
+	}
 
-	if (len(goalHistory) == 0 && len(winHistory) >= 1) {
+	playSound("denied")
+
+	if len(goalHistory) == 0 && len(winHistory) >= 1 {
 		goalHistory = lastGoalHistory
 		winHistory = winHistory[:len(winHistory)-1]
 	}
@@ -98,14 +108,16 @@ func undoScore() {
 }
 
 func resetScore() {
-	if (!gameIsRunning) { return }
+	if !gameIsRunning {
+		return
+	}
 	goalHistory = []Goal{}
 	roundStartTime = time.Now()
 	updateScore()
 }
 
 func updateScore() {
-  debug()
+	debug()
 
 	scoreRed = 0
 	scoreWhite = 0
@@ -157,7 +169,7 @@ func teamsAreSwapped() bool {
 func nextRound() {
 	publish("round/end", "end", false)
 	publish("round/current", strconv.Itoa(currentRound()), true)
-	
+
 	rounds, _ := json.Marshal(winHistory)
 	fmt.Printf(string(rounds))
 	lastGoalHistory = goalHistory
@@ -184,10 +196,10 @@ func roundEnd() {
 	for _, round := range winHistory {
 		switch round.Winner {
 		case "a":
-				teamAWinCount++
+			teamAWinCount++
 
 		case "b":
-				teamBWinCount++
+			teamBWinCount++
 		}
 	}
 
@@ -227,11 +239,9 @@ func clearAll() {
 	gameIsRunning = false
 
 	publish("round/current", strconv.Itoa(currentRound()), true)
-	
+
 	debug()
 }
-
-
 
 func debug() {
 	publish("debug/teamAWinCount", strconv.Itoa(teamAWinCount), false)
