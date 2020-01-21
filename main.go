@@ -64,6 +64,8 @@ func main() {
 	select {
 	case <-quit:
 	}
+
+	clearAll()
 }
 
 func leadingTeam() string {
