@@ -182,15 +182,15 @@ func nextRound() {
 func roundEnd() {
 	if scoreRed >= scoreWhite {
 		if teamsAreSwapped() {
-			winHistory = append(winHistory, Round{Winner: "b", Time: time.Since(roundStartTime).Seconds()})
+			winHistory = append(winHistory, Round{ScoreA: scoreWhite, ScoreB: scoreRed, Winner: "b", Time: time.Since(roundStartTime).Seconds()})
 		} else {
-			winHistory = append(winHistory, Round{Winner: "a", Time: time.Since(roundStartTime).Seconds()})
+			winHistory = append(winHistory, Round{ScoreA: scoreRed, ScoreB: scoreWhite, Winner: "a", Time: time.Since(roundStartTime).Seconds()})
 		}
 	} else {
 		if teamsAreSwapped() {
-			winHistory = append(winHistory, Round{Winner: "a", Time: time.Since(roundStartTime).Seconds()})
+			winHistory = append(winHistory, Round{ScoreA: scoreWhite, ScoreB: scoreRed, Winner: "a", Time: time.Since(roundStartTime).Seconds()})
 		} else {
-			winHistory = append(winHistory, Round{Winner: "b", Time: time.Since(roundStartTime).Seconds()})
+			winHistory = append(winHistory, Round{ScoreA: scoreRed, ScoreB: scoreWhite, Winner: "b", Time: time.Since(roundStartTime).Seconds()})
 		}
 	}
 
@@ -226,6 +226,13 @@ func gameEnd(winner string) {
 	publish("game/end", string(game), false)
 	publish("sound/play", "end", false)
 
+	reportGame(winHistory)
+
+	resetScore()
+	clearAll()
+}
+
+func stopGame() {
 	resetScore()
 	clearAll()
 }

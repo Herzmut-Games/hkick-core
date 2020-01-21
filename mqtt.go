@@ -45,6 +45,9 @@ func subscribe(uri *url.URL) {
 	client.Subscribe("game/start", 0, func(client mqtt.Client, msg mqtt.Message) {
 		startGame()
 	})
+	client.Subscribe("game/stop", 0, func(client mqtt.Client, msg mqtt.Message) {
+		stopGame()
+	})
 }
 
 func publish(topic string, message string, retain bool) {
