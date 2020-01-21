@@ -1,6 +1,6 @@
 before:
   hooks:
-    - go get github.com/eclipse/paho.mqtt.golang
+    - go get
 builds:
   - env:
       - CGO_ENABLED=0
