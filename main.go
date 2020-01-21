@@ -153,6 +153,7 @@ func updateScore() {
 func startGame() {
 	clearAll()
 	gameIsRunning = true
+	publish("game/status", "running", true)
 	publish("sound/play", "start", false)
 	updateScore()
 
@@ -238,6 +239,7 @@ func clearAll() {
 	goalHistory = []Goal{}
 	gameIsRunning = false
 
+	publish("game/status", "stopped", true)
 	publish("round/current", strconv.Itoa(currentRound()), true)
 
 	debug()
