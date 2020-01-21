@@ -56,6 +56,7 @@ func playSound(event string) {
 func main() {
 	connect("hkick-core", mqttURI())
 	go subscribe(mqttURI())
+	clearAll()
 
 	// capture exit signals to ensure resources are released on exit.
 	quit := make(chan os.Signal, 1)
@@ -65,7 +66,6 @@ func main() {
 	case <-quit:
 	}
 
-	clearAll()
 }
 
 func leadingTeam() string {
