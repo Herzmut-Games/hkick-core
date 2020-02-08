@@ -1,4 +1,4 @@
 #!/bin/bash
-systemctl disable hkick-core
-systemctl stop hkick-core
+systemctl disable kickr-core
+systemctl stop kickr-core
 systemctl daemon-reload

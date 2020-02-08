@@ -9,16 +9,16 @@ builds:
 
 nfpms:
   - id: foo
-    vendor: Herzmut Games Ltd.
-    homepage: https://herzmut.games
+    vendor: kickr
+    homepage: https://kickr.me
 
     maintainer: Flipez <code@brauser.io>
-    description: hkick-core
+    description: kickr-core
     formats:
       - deb
 
     files:
-      "scripts/etc/systemd/system/hkick-core.service": "/etc/systemd/system/hkick-core.service"
+      "scripts/etc/systemd/system/kickr-core.service": "/etc/systemd/system/kickr-core.service"
 
     scripts:
       postinstall: "scripts/postinstall.sh"

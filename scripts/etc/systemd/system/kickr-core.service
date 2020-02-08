@@ -1,12 +1,12 @@
 [Unit]
-Description=Start hkick-core
+Description=Start kickr core
 
 [Service]
 PrivateTmp=true
 User=pi
 Group=pi
 Type=simple
-ExecStart=/usr/local/bin/hkick-core
+ExecStart=/usr/local/bin/kickr-core
 Restart=always
 RestartSec=3
 

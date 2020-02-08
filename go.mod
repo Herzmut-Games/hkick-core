@@ -1,4 +1,4 @@
-module github.com/herzmut-games/hkick-core
+module github.com/kickr-me/core
 
 go 1.13
 

@@ -24,7 +24,7 @@ var (
 	// The teams will be fixed in the first round as follows:
 	// team A will start as red
 	// team B will start as white
-	// after one round teams will be swapped. hkick-core needs to take care of that when counting win.
+	// after one round teams will be swapped. kickr-core needs to take care of that when counting win.
 	teamAWinCount = 0
 	teamBWinCount = 0
 
@@ -54,7 +54,7 @@ func playSound(event string) {
 }
 
 func main() {
-	connect("hkick-core", mqttURI())
+	connect("kickr-core", mqttURI())
 	go subscribe(mqttURI())
 	clearAll()
 

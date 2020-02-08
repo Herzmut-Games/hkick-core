@@ -1,4 +1,4 @@
 #!/bin/bash
 systemctl daemon-reload
-systemctl enable hkick-core
-systemctl start hkick-core
+systemctl enable kickr-core
+systemctl start kickr-core

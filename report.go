@@ -8,7 +8,7 @@ import (
 )
 
 func reportGame(winHistory []Round) {
-	url := "https://kicker.herzmut.games"
+	url := "https://dashboard.kickr.me"
 	client := resty.New()
 	var match BackendMatch
 
