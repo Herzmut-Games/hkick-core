@@ -57,6 +57,7 @@ func main() {
 	connect("kickr-core", mqttURI())
 	go subscribe(mqttURI())
 	clearAll()
+	publish("game/status", "stopped", true)
 
 	// capture exit signals to ensure resources are released on exit.
 	quit := make(chan os.Signal, 1)
@@ -230,11 +231,14 @@ func gameEnd(winner string) {
 
 	resetScore()
 	clearAll()
+	publish("game/status", "stopped", true)
+	
 }
 
 func stopGame() {
 	resetScore()
 	clearAll()
+	publish("game/status", "stopped", true)
 }
 
 func clearAll() {
@@ -248,7 +252,6 @@ func clearAll() {
 	goalHistory = []Goal{}
 	gameIsRunning = false
 
-	publish("game/status", "stopped", true)
 	publish("round/current", strconv.Itoa(currentRound()), true)
 
 	debug()
