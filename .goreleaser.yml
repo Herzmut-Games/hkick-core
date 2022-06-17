@@ -17,8 +17,9 @@ nfpms:
     formats:
       - deb
 
-    files:
-      "scripts/etc/systemd/system/kickr-core.service": "/etc/systemd/system/kickr-core.service"
+    contents:
+      - src: "scripts/etc/systemd/system/kickr-core.service"
+        dst: "/etc/systemd/system/kickr-core.service"
 
     scripts:
       postinstall: "scripts/postinstall.sh"
