@@ -101,6 +101,7 @@ func undoScore() {
 	if len(goalHistory) == 0 && len(winHistory) >= 1 {
 		goalHistory = lastGoalHistory
 		winHistory = winHistory[:len(winHistory)-1]
+		publish("score/undo-round", "undo", false)
 	}
 
 	if len(goalHistory) > 0 {
@@ -232,7 +233,7 @@ func gameEnd(winner string) {
 	resetScore()
 	clearAll()
 	publish("game/status", "stopped", true)
-	
+
 }
 
 func stopGame() {
