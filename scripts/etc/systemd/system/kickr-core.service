@@ -6,7 +6,7 @@ PrivateTmp=true
 User=pi
 Group=pi
 Type=simple
-ExecStart=/usr/local/bin/kickr-core
+ExecStart=/usr/bin/kickr-core
 Restart=always
 RestartSec=3
 
