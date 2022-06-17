@@ -11,6 +11,7 @@ nfpms:
   - id: foo
     vendor: kickr
     homepage: https://kickr.me
+    package_name: kickr-core
 
     maintainer: Flipez <code@brauser.io>
     description: kickr-core
